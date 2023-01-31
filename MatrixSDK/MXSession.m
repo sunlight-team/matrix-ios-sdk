@@ -20,7 +20,7 @@
 #import "MXSession.h"
 #import "MatrixSDK.h"
 
-#import <AFNetworking/AFNetworking.h>
+#import "AFNetworking.h"
 
 #import "MXSessionEventListener.h"
 

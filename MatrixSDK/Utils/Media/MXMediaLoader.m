@@ -23,7 +23,7 @@
 #import "MXSDKOptions.h"
 
 #import "MXAllowedCertificates.h"
-#import <AFNetworking/AFSecurityPolicy.h>
+#import <AFNetworking.h>
 
 NSString *const kMXMediaLoaderStateDidChangeNotification = @"kMXMediaLoaderStateDidChangeNotification";
 
