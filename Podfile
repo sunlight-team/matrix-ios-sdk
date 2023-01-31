@@ -2,7 +2,7 @@
 
 # Expose Objective-C frameworks to Swift
 # Build and link dependencies as static frameworks
-#use_frameworks! :linkage => :static
+use_frameworks! :linkage => :static
 
 abstract_target 'MatrixSDK' do
     pod 'OLMKit', '~> 3.2.5', :inhibit_warnings => true
