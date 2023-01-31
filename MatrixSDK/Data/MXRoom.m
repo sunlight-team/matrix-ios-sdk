@@ -1438,6 +1438,11 @@ NSInteger const kMXRoomInvalidInviteSenderErrorCode = 9002;
             }
             else
             {
+                // Save converted video locally to resend
+                NSData* videoFileData = [NSData dataWithContentsOfFile:convertedLocalURL.path];
+                NSString *videoFileCachePath = [MXMediaManager cachePathForMatrixContentURI:fakeMediaURI andType:mimetype inFolder:self.roomId];
+                [MXMediaManager writeMediaData:videoFileData toFilePath:videoFileCachePath];
+
                 // Upload thumbnail
                 [thumbUploader uploadData:videoThumbnailData filename:nil mimeType:@"image/jpeg" success:^(NSString *thumbnailUrl) {
 
