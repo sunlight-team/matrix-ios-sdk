@@ -22,8 +22,30 @@ API which is defined at http://matrix.org/docs/api/client-server/.
 Sunlight integration scheme
 ==============
 
-.. image:: ./MatrixScheme.png
+.. image:: ./ReadmeSourses/MatrixScheme.png
     :align: center
+
+Run workspace
+==============
+
+To build the project, you need to manually add the packages::
+
+   https://github.com/SwiftyBeaver/SwiftyBeaver.git
+   https://github.com/nicklockwood/GZIP.git
+   https://github.com/AFNetworking/AFNetworking.git #use only 4.0.1
+   https://github.com/realm/realm-swift.git
+
+.. image:: ./ReadmeSourses/Packages.png
+    :align: center
+
+Create xcframework
+==============
+
+To create a xcframework, run the script::
+
+   sh build.sh
+
+Then transfer the xcframework to our repository with the Matrix package 
 
 Use the SDK in your app
 =======================
