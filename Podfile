@@ -5,16 +5,9 @@
 use_frameworks! :linkage => :static
 
 abstract_target 'MatrixSDK' do
-    
-    pod 'AFNetworking', '~> 4.0.0'
-    pod 'GZIP', '~> 1.3.0'
-
-    pod 'SwiftyBeaver', '1.9.5'
-    
     pod 'OLMKit', '~> 3.2.5', :inhibit_warnings => true
     #pod 'OLMKit', :path => '../olm/OLMKit.podspec'
     
-    pod 'Realm', '10.27.0'
     pod 'libbase58', '~> 0.1.4'
     pod 'MatrixSDKCrypto', "0.1.8", :configurations => ['DEBUG'], :inhibit_warnings => true
     

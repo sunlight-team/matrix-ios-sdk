@@ -15,7 +15,7 @@
 //
 
 import Foundation
-import Realm
+@_implementationOnly import Realm
 
 @objcMembers
 public class MXBeaconInfoSummaryRealmStore: NSObject {
@@ -156,9 +156,9 @@ public class MXBeaconInfoSummaryRealmStore: NSObject {
         
         var summaries: [MXBeaconInfoSummary] = []
         
-        for realmSummary in realmBeaconInfoSummaryResults {
-            
-            if let realmBeaconInfoSummary = realmSummary as? MXRealmBeaconInfoSummary, let summary = self.mapper.beaconInfoSummary(from: realmBeaconInfoSummary) {
+        for index in 0...(realmBeaconInfoSummaryResults.count - 1) {
+            let realmSummary = realmBeaconInfoSummaryResults.object(at: index)
+            if let summary = self.mapper.beaconInfoSummary(from: realmSummary) {
                 summaries.append(summary)
             }
         }

@@ -19,8 +19,8 @@
 #import "MXLogger.h"
 #import "MatrixSDK.h"
 
-#import <AFNetworking/AFNetworking.h>
-#import <GZIP/GZIP.h>
+#import "AFNetworking.h"
+#import "NSData+GZIP.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>

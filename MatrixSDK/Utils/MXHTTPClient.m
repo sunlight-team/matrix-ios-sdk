@@ -26,7 +26,7 @@
 #import "MXHTTPClient_Private.h"
 #import "MXCredentials.h"
 
-#import <AFNetworking/AFNetworking.h>
+#import "AFNetworking.h"
 
 #pragma mark - Constants definitions
 /**

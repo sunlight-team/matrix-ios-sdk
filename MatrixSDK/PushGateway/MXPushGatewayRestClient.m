@@ -16,7 +16,7 @@ limitations under the License.
 
 #import "MXPushGatewayRestClient.h"
 
-#import <AFNetworking/AFNetworking.h>
+#import "AFNetworking.h"
 #import <OLMKit/OLMUtility.h>
 
 #import "MXError.h"
