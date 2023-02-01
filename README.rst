@@ -19,6 +19,11 @@ and VoIP.
 This SDK implements an interface to communicate with the Matrix Client/Server
 API which is defined at http://matrix.org/docs/api/client-server/.
 
+Sunlight integration scheme
+==============
+
+![plot](./MatrixScheme.png)
+
 
 Use the SDK in your app
 =======================
