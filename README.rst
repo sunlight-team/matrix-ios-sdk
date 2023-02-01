@@ -45,7 +45,10 @@ To create a xcframework, run the script::
 
    sh build.sh
 
-Then transfer the xcframework to our repository with the Matrix package 
+Then transfer the xcframework to our repository with the Matrix package::
+
+   https://bitbucket.org/sunlight_team/sl-ios-matrix/src/master/
+
 
 Use the SDK in your app
 =======================
