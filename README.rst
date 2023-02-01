@@ -22,7 +22,7 @@ API which is defined at http://matrix.org/docs/api/client-server/.
 Sunlight integration scheme
 ==============
 
-![plot](./MatrixScheme.png)
+![Screenshot](MatrixScheme.png)
 
 
 Use the SDK in your app
