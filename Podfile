@@ -9,7 +9,7 @@ abstract_target 'MatrixSDK' do
     #pod 'OLMKit', :path => '../olm/OLMKit.podspec'
     
     pod 'libbase58', '~> 0.1.4'
-    pod 'MatrixSDKCrypto', "0.1.8", :configurations => ['DEBUG'], :inhibit_warnings => true
+    pod 'MatrixSDKCrypto', "0.3.4", :inhibit_warnings => true
     
     target 'MatrixSDK-iOS' do
         platform :ios, '11.0'

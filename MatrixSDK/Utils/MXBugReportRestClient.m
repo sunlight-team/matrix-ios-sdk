@@ -21,6 +21,7 @@
 
 #import "AFNetworking.h"
 #import "NSData+GZIP.h"
+#import "MatrixSDKSwiftHeader.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
@@ -199,16 +200,6 @@
         {
             [formData appendPartWithFormData:[self.build dataUsingEncoding:NSUTF8StringEncoding] name:@"build"];
         }
-
-#if __has_include(<MatrixKit/MatrixKit.h>)
-        [formData appendPartWithFormData:[MatrixKitVersion dataUsingEncoding:NSUTF8StringEncoding] name:@"matrix_kit_version"];
-#endif
-
-        [formData appendPartWithFormData:[MatrixSDKVersion dataUsingEncoding:NSUTF8StringEncoding] name:@"matrix_sdk_version"];
-
-#ifdef MX_CRYPTO
-        [formData appendPartWithFormData:[[OLMKit versionString] dataUsingEncoding:NSUTF8StringEncoding] name:@"olm_kit_version"];
-#endif
 
         if (self.deviceModel)
         {

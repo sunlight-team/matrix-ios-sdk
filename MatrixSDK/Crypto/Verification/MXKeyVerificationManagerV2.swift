@@ -6,9 +6,6 @@
 //
 
 import Foundation
-
-#if DEBUG
-
 import MatrixSDKCrypto
 
 class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
@@ -216,17 +213,26 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
             log.error("There is no pending verification request")
             return nil
         }
-
-        do {
-            let qr = try activeRequest.startQrVerification()
-            log.debug("Starting new QR verification")
-            return addQrTransaction(for: request, qrCode: qr, isIncoming: false)
-        } catch {
+        
+        let theirMethods = request.theirSupportedMethods() ?? []
+        if theirMethods.contains(MXKeyVerificationMethodQRCodeScan) {
+            do {
+                let qr = try activeRequest.startQrVerification()
+                log.debug("Starting new QR verification")
+                return addQrTransaction(for: request, qr: .code(qr), isIncoming: false)
+            } catch {
+                log.error("Cannot start QR verification", context: error)
+                return nil
+            }
+        } else if theirMethods.contains(MXKeyVerificationMethodQRCodeShow) {
             /// Placehoder QR transaction generated in case we cannot start a QR verification flow
             /// (the other device cannot scan our code) but we may be able to scan theirs
             log.debug("Adding placeholder QR verification")
-            return addQrTransaction(for: request, qrCode: nil, isIncoming: false)
+            return addQrTransaction(for: request, qr: .placeholder, isIncoming: false)
         }
+        
+        log.debug("No support for QR verification flow")
+        return nil
     }
     
     func removeQRCodeTransaction(withTransactionId transactionId: String) {
@@ -267,25 +273,31 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
         }
     }
     
-    @MainActor
-    func handleRoomEvent(_ event: MXEvent) -> String? {
-        guard isRoomVerificationEvent(event) else {
-            return nil
+    func handleRoomEvent(_ event: MXEvent) async throws {
+        guard isIncomingRoomVerificationEvent(event) else {
+            return
         }
         
-        if !event.isEncrypted, let roomId = event.roomId {
-            handler.receiveUnencryptedVerificationEvent(event: event, roomId: roomId)
+        if let roomId = event.roomId {
+            log.debug("Recieved new verification event \(event.eventType)")
+            try await handler.receiveVerificationEvent(event: event, roomId: roomId)
         }
         
+        let newUserId: String?
         if event.type == kMXEventTypeStringRoomMessage && event.content?[kMXMessageTypeKey] as? String == kMXMessageTypeKeyVerificationRequest {
-            handleIncomingRequest(userId: event.sender, flowId: event.eventId)
-            return event.sender
-            
-        } else if event.type == kMXEventTypeStringKeyVerificationStart, let flowId = event.relatesTo.eventId {
-            handleIncomingVerification(userId: event.sender, flowId: flowId)
-            return event.sender
+            await handleIncomingRequest(userId: event.sender, flowId: event.eventId)
+            newUserId = event.sender
+        } else if event.type == kMXEventTypeStringKeyVerificationStart, let flowId = event.relatesTo?.eventId {
+            await handleIncomingVerification(userId: event.sender, flowId: flowId)
+            newUserId = event.sender
         } else {
-            return nil
+            newUserId = nil
+        }
+
+        // If we received a verification event from a new user we do not yet track
+        // we need to download their keys to be able to proceed with the verification flow
+        if let userId = newUserId {
+            try await self.handler.downloadKeysIfNecessary(users: [userId])
         }
     }
     
@@ -426,7 +438,7 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
                 log.debug("Updating existing QR verification transaction")
             } else {
                 log.debug("Tracking new QR verification transaction")
-                _ = addQrTransaction(for: request, qrCode: qrCode, isIncoming: true)
+                _ = addQrTransaction(for: request, qr: .code(qrCode), isIncoming: true)
             }
         }
     }
@@ -439,8 +451,8 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
     }
     
     @MainActor
-    private func addQrTransaction(for request: VerificationRequestProtocol, qrCode: QrCodeProtocol?, isIncoming: Bool) -> MXQRCodeTransactionV2 {
-        let transaction = MXQRCodeTransactionV2(request: request, qrCode: qrCode, isIncoming: isIncoming, handler: handler)
+    private func addQrTransaction(for request: VerificationRequestProtocol, qr: MXQRCodeTransactionV2.QrKind, isIncoming: Bool) -> MXQRCodeTransactionV2 {
+        let transaction = MXQRCodeTransactionV2(request: request, qr: qr, isIncoming: isIncoming, handler: handler)
         activeTransactions[transaction.transactionId] = transaction
         return transaction
     }
@@ -460,7 +472,13 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
         return roomId
     }
     
-    private func isRoomVerificationEvent(_ event: MXEvent) -> Bool {
+    private func isIncomingRoomVerificationEvent(_ event: MXEvent) -> Bool {
+        // Only consider events not coming from our own user, because verification events
+        // for the same user are sent as encrypted to-device messages
+        guard event.sender != session?.myUserId else {
+            return false
+        }
+        
         // Filter incoming events by allowed list of event types
         guard Self.dmEventTypes.contains(where: { $0.identifier == event.type }) else {
             return false
@@ -480,5 +498,3 @@ class MXKeyVerificationManagerV2: NSObject, MXKeyVerificationManager {
         return messageType == kMXMessageTypeKeyVerificationRequest
     }
 }
-
-#endif

@@ -54,15 +54,9 @@ static MXSDKOptions *sharedOnceInstance = nil;
         _authEnableRefreshTokens = NO;
         _enableThreads = NO;
         _enableRoomSharedHistoryOnInvite = NO;
-        
-        #if DEBUG
-        _isCryptoSDKAvailable = NO;
-        _enableCryptoSDK = NO;
-        #endif
-        
         _enableSymmetricBackup = NO;
         _enableNewClientInformationFeature = NO;
-        _enableStartupProgress = NO;
+        _cryptoMigrationDelegate = nil;
     }
     
     return self;
