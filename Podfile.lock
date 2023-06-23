@@ -1,6 +1,6 @@
 PODS:
   - libbase58 (0.1.4)
-  - MatrixSDKCrypto (0.1.8)
+  - MatrixSDKCrypto (0.3.4)
   - OHHTTPStubs (9.1.0):
     - OHHTTPStubs/Default (= 9.1.0)
   - OHHTTPStubs/Core (9.1.0)
@@ -22,7 +22,7 @@ PODS:
 
 DEPENDENCIES:
   - libbase58 (~> 0.1.4)
-  - MatrixSDKCrypto (= 0.1.8)
+  - MatrixSDKCrypto (= 0.3.4)
   - OHHTTPStubs (~> 9.1.0)
   - OLMKit (~> 3.2.5)
 
@@ -35,10 +35,10 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   libbase58: 7c040313537b8c44b6e2d15586af8e21f7354efd
-  MatrixSDKCrypto: 862d9b4dbb6861da030943f5a18c39258ed7345b
+  MatrixSDKCrypto: ac805c22c24f79f349cdbfa065855c73a4c81b51
   OHHTTPStubs: 90eac6d8f2c18317baeca36698523dc67c513831
   OLMKit: da115f16582e47626616874e20f7bb92222c7a51
 
-PODFILE CHECKSUM: 434255d328dd8c1489af924295f8ba1e7394f6f1
+PODFILE CHECKSUM: 1f62faca63c76cd6f3970c6b2559f88bc26fc268
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

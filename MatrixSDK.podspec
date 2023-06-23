@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "MatrixSDK"
-  s.version      = "0.24.8"
+  s.version      = "0.26.10"
   s.summary      = "The iOS SDK to build apps compatible with Matrix (https://www.matrix.org)"
 
   s.description  = <<-DESC
@@ -45,7 +45,7 @@ Pod::Spec.new do |s|
       ss.dependency 'OLMKit', '~> 3.2.5'
       ss.dependency 'Realm', '10.27.0'
       ss.dependency 'libbase58', '~> 0.1.4'
-      ss.dependency 'MatrixSDK/CryptoSDK'
+      ss.dependency 'MatrixSDKCrypto', '0.3.4', :configurations => ["DEBUG", "RELEASE"], :inhibit_warnings => true
   end
 
   s.subspec 'JingleCallStack' do |ss|
@@ -61,12 +61,8 @@ Pod::Spec.new do |s|
     #ss.ios.dependency 'GoogleWebRTC', '~>1.1.21820'
     
     # Use WebRTC framework included in Jitsi Meet SDK
-    ss.ios.dependency 'JitsiMeetSDK', '5.0.2'
-  end
-  
-  # Experimental / NOT production-ready Rust-based crypto library
-  s.subspec 'CryptoSDK' do |ss|
-    ss.dependency 'MatrixSDKCrypto', '0.1.8', :configurations => ["DEBUG"], :inhibit_warnings => true
+    # Use the lite version so we don't add a dependency on Giphy.
+    ss.ios.dependency 'JitsiMeetSDKLite', '7.0.1-lite'
   end
 
 end

@@ -15,10 +15,7 @@
 //
 
 import Foundation
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 /// SAS transaction originating from `MatrixSDKCrypto`
 class MXSASTransactionV2: NSObject, MXSASTransaction {
@@ -208,4 +205,3 @@ extension MXSASTransactionState {
     }
 }
 
-#endif

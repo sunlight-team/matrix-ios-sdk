@@ -16,8 +16,6 @@
 
 import Foundation
 
-#if DEBUG
-
 /// An implementation of `MXCrossSigning` compatible with `MXCryptoV2` and `MatrixSDKCrypto`
 class MXCrossSigningV2: NSObject, MXCrossSigning {
     enum Error: Swift.Error {
@@ -31,7 +29,8 @@ class MXCrossSigningV2: NSObject, MXCrossSigning {
         }
     
         if info.trustLevel.isVerified {
-            return hasAllPrivateKeys ? .canCrossSign : .trustCrossSigning
+            let status = crossSigning.crossSigningStatus()
+            return status.hasSelfSigning && status.hasUserSigning ? .canCrossSign : .trustCrossSigning
         } else {
             return .crossSigningExists
         }
@@ -117,14 +116,20 @@ class MXCrossSigningV2: NSObject, MXCrossSigning {
         success: ((Bool) -> Void)?,
         failure: ((Swift.Error) -> Void)? = nil
     ) {
-        log.debug("->")
+        log.debug("Refreshing cross signing state, current state: \(state)")
         
         Task {
             do {
                 try await crossSigning.refreshCrossSigningStatus()
                 myUserCrossSigningKeys = infoSource.crossSigningInfo(userId: crossSigning.userId)
                 
-                log.debug("Cross signing state refreshed")
+                // If we are considered verified, there is no need for a verification upgrade
+                // after migrating from legacy crypto
+                if myUserCrossSigningKeys?.trustLevel.isVerified == true {
+                    MXSDKOptions.sharedInstance().cryptoMigrationDelegate?.needsVerificationUpgrade = false
+                }
+                
+                log.debug("Cross signing state refreshed, new state: \(state)")
                 await MainActor.run {
                     success?(true)
                 }
@@ -139,10 +144,17 @@ class MXCrossSigningV2: NSObject, MXCrossSigning {
 
     func crossSignDevice(
         withDeviceId deviceId: String,
+        userId: String,
         success: @escaping () -> Void,
         failure: @escaping (Swift.Error) -> Void
     ) {
-        log.debug("->")
+        log.debug("Attempting to cross sign a device \(deviceId)")
+        
+        if let device = crossSigning.device(userId: userId, deviceId: deviceId), device.crossSigningTrusted {
+            log.debug("Device is already cross-signing trusted, no need to verify")
+            success()
+            return
+        }
         
         Task {
             do {
@@ -205,8 +217,9 @@ class MXCrossSigningV2: NSObject, MXCrossSigning {
             let session = authSession.session,
             let userId = restClient.credentials?.userId
         else {
-            log.error("Missing parameters")
-            throw Error.missingAuthSession
+            // Try to setup cross-signing without authentication parameters in case if a grace period is enabled
+            log.warning("Setting up cross-signing without authentication parameters")
+            return [:]
         }
 
         return [
@@ -234,4 +247,19 @@ extension MXCrossSigningV2: MXRecoveryServiceDelegate {
     }
 }
 
-#endif
+extension MXCrossSigningState: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .notBootstrapped:
+            return "notBootstrapped"
+        case .crossSigningExists:
+            return "crossSigningExists"
+        case .trustCrossSigning:
+            return "trustCrossSigning"
+        case .canCrossSign:
+            return "canCrossSign"
+        @unknown default:
+            return "unknown"
+        }
+    }
+}

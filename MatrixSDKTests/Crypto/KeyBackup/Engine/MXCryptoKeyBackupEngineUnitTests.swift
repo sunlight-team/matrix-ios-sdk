@@ -16,10 +16,7 @@
 
 import Foundation
 @testable import MatrixSDK
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 class MXCryptoKeyBackupEngineUnitTests: XCTestCase {
     actor DecryptorSpy: MXRoomEventDecrypting {
@@ -233,5 +230,3 @@ class MXCryptoKeyBackupEngineUnitTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 }
-
-#endif

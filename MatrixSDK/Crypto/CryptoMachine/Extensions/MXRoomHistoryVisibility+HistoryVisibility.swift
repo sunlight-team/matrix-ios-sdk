@@ -15,10 +15,7 @@
 //
 
 import Foundation
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 extension MXRoomHistoryVisibility {
     var visibility: HistoryVisibility {
@@ -34,5 +31,3 @@ extension MXRoomHistoryVisibility {
         }
     }
 }
-
-#endif

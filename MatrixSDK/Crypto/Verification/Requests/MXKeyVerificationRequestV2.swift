@@ -15,10 +15,7 @@
 //
 
 import Foundation
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 /// Verification request originating from `MatrixSDKCrypto`
 class MXKeyVerificationRequestV2: NSObject, MXKeyVerificationRequest { 
@@ -205,6 +202,4 @@ private extension MXKeyVerificationRequestState {
         }
     }
 }
-
-#endif
 

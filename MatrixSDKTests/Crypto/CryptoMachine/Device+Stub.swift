@@ -15,10 +15,7 @@
 //
 
 import Foundation
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 extension Device {
     static func stub(
@@ -47,5 +44,3 @@ extension Device {
         )
     }
 }
-
-#endif

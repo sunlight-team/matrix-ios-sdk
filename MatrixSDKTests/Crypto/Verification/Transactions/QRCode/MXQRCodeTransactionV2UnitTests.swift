@@ -16,10 +16,7 @@
 
 import Foundation
 import XCTest
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 @testable import MatrixSDK
 
 class MXQRCodeTransactionV2UnitTests: XCTestCase {
@@ -31,7 +28,7 @@ class MXQRCodeTransactionV2UnitTests: XCTestCase {
     func makeTransaction(for request: VerificationRequestStub = .init(), qrCode: QrCodeStub = .init(), isIncoming: Bool = true) -> MXQRCodeTransactionV2 {
         .init(
             request: request,
-            qrCode: qrCode,
+            qr: .code(qrCode),
             isIncoming: isIncoming,
             handler: verification
         )
@@ -121,5 +118,3 @@ class MXQRCodeTransactionV2UnitTests: XCTestCase {
         XCTAssertEqual(transaction.state, .cancelled)
     }
 }
-
-#endif

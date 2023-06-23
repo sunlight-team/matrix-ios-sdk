@@ -1,4 +1,4 @@
-// 
+//
 // Copyright 2022 The Matrix.org Foundation C.I.C
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,7 @@
 import Foundation
 @testable import MatrixSDK
 
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 class MXRoomEventDecryptionUnitTests: XCTestCase {
     class DecryptorStub: CryptoIdentityStub, MXCryptoRoomEventDecrypting {
@@ -104,7 +102,9 @@ class MXRoomEventDecryptionUnitTests: XCTestCase {
         let invalidEvent = MXEvent.fixture(id: 123)
         
         await decryptor.handlePossibleRoomKeyEvent(invalidEvent)
-        await waitForDecryption()
+        // We do not expect anything to be decrypted, so there is no notification or other signal to listen to
+        // We will simply wait an entire second and assert nothing was decrypted
+        try! await Task.sleep(nanoseconds: 1_000_000_000)
         
         XCTAssertNil(events[0].clear)
         XCTAssertNil(events[1].clear)
@@ -116,7 +116,7 @@ class MXRoomEventDecryptionUnitTests: XCTestCase {
         let roomKey = MXEvent.roomKeyFixture(sessionId: "123")
         
         await decryptor.handlePossibleRoomKeyEvent(roomKey)
-        await waitForDecryption()
+        await waitForDecryption(events: events)
 
         XCTAssertNotNil(events[0].clear)
         XCTAssertNil(events[1].clear)
@@ -128,7 +128,7 @@ class MXRoomEventDecryptionUnitTests: XCTestCase {
         let roomKey = MXEvent.forwardedRoomKeyFixture(sessionId: "123")
         
         await decryptor.handlePossibleRoomKeyEvent(roomKey)
-        await waitForDecryption()
+        await waitForDecryption(events: events)
 
         XCTAssertNotNil(events[0].clear)
         XCTAssertNil(events[1].clear)
@@ -141,7 +141,7 @@ class MXRoomEventDecryptionUnitTests: XCTestCase {
         let events = await prepareEventsForRedecryption()
         
         await decryptor.retryUndecryptedEvents(sessionIds: ["123", "456"])
-        await waitForDecryption()
+        await waitForDecryption(events: events)
         
         XCTAssertNotNil(events[0].clear)
         XCTAssertNotNil(events[1].clear)
@@ -190,12 +190,21 @@ class MXRoomEventDecryptionUnitTests: XCTestCase {
         return events
     }
     
-    private func waitForDecryption() async {
+    private func waitForDecryption(events: [MXEvent]) async {
         // When decrypting successfully, a notification will be triggered on the main thread, so we have to
         // make sure we wait until this happens. We cannot listen to notifications directly, because
         // repeated decryption failures will not trigger any. Instead simply wait a little while.
-        try! await Task.sleep(nanoseconds: 1_000_000)
+        
+        // Maximum 100 attempts each pausing for a tenth of a second
+        for _ in 0 ..< 100 {
+            
+            // As soon as at least one event is decrypted, we assume all are and return
+            if events.contains(where: { $0.clear != nil }) {
+                return
+            }
+            
+            // Otherwise wait for a 0.1 second and run the next loop cycle
+            try! await Task.sleep(nanoseconds: 100_000_000)
+        }
     }
 }
-
-#endif

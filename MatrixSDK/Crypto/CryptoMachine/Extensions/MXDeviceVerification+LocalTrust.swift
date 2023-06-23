@@ -15,10 +15,7 @@
 //
 
 import Foundation
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 extension MXDeviceVerification {
     var localTrust: LocalTrust {
@@ -37,5 +34,3 @@ extension MXDeviceVerification {
         }
     }
 }
-
-#endif

@@ -17,10 +17,7 @@
 import Foundation
 import XCTest
 @testable import MatrixSDK
-
-#if DEBUG
-
-import MatrixSDKCrypto
+@_implementationOnly import MatrixSDKCrypto
 
 class MXCrossSigningInfoSourceUnitTests: XCTestCase {
     var cryptoSource: UserIdentitySourceStub!
@@ -56,5 +53,3 @@ class MXCrossSigningInfoSourceUnitTests: XCTestCase {
         XCTAssertEqual(info?.trustLevel.isVerified, true)
     }
 }
-
-#endif

@@ -16,9 +16,6 @@
 
 import Foundation
 @testable import MatrixSDK
-
-#if DEBUG
-
 @testable import MatrixSDKCrypto
 
 class CryptoIdentityStub: MXCryptoIdentity {
@@ -75,6 +72,10 @@ class UserIdentitySourceStub: CryptoIdentityStub, MXCryptoUserIdentitySource {
 }
 
 class CryptoCrossSigningStub: CryptoIdentityStub, MXCryptoCrossSigning {
+    enum Error: Swift.Error {
+        case deviceMissing
+    }
+    
     var stubbedStatus = CrossSigningStatus(
         hasMaster: false,
         hasSelfSigning: false,
@@ -88,7 +89,9 @@ class CryptoCrossSigningStub: CryptoIdentityStub, MXCryptoCrossSigning {
         return stubbedStatus
     }
     
+    var spyAuthParams: [AnyHashable: Any]?
     func bootstrapCrossSigning(authParams: [AnyHashable : Any]) async throws {
+        self.spyAuthParams = authParams
     }
     
     func exportCrossSigningKeys() -> CrossSigningKeyExport? {
@@ -118,10 +121,38 @@ class CryptoCrossSigningStub: CryptoIdentityStub, MXCryptoCrossSigning {
     func verifyUser(userId: String) async throws {
     }
     
+    var verifiedDevicesSpy = Set<String>()
     func verifyDevice(userId: String, deviceId: String) async throws {
+        guard let device = devices[userId]?[deviceId] else {
+            throw Error.deviceMissing
+        }
+        
+        verifiedDevicesSpy.insert(deviceId)
+        
+        devices[userId]?[deviceId] = Device(
+            userId: device.userId,
+            deviceId: device.deviceId,
+            keys: device.keys,
+            algorithms: device.algorithms,
+            displayName: device.displayName,
+            isBlocked: device.isBlocked,
+            locallyTrusted: device.locallyTrusted,
+            // Modify cross signing trusted
+            crossSigningTrusted: true
+        )
     }
     
     func setLocalTrust(userId: String, deviceId: String, trust: LocalTrust) throws {
+    }
+    
+    var devices = [String: [String: Device]]()
+    
+    func device(userId: String, deviceId: String) -> Device? {
+        return devices[userId]?[deviceId]
+    }
+    
+    func devices(userId: String) -> [Device] {
+        return devices[userId]?.map { $0.value } ?? []
     }
 }
 
@@ -130,8 +161,10 @@ class CryptoVerificationStub: CryptoIdentityStub {
 }
 
 extension CryptoVerificationStub: MXCryptoVerifying {
-    func receiveUnencryptedVerificationEvent(event: MXEvent, roomId: String) {
-        
+    func downloadKeysIfNecessary(users: [String]) async throws {
+    }
+    
+    func receiveVerificationEvent(event: MXEvent, roomId: String) {
     }
     
     func requestSelfVerification(methods: [String]) async throws -> VerificationRequestProtocol {
@@ -212,5 +245,3 @@ class CryptoBackupStub: MXCryptoBackup {
         return KeysImportResult(imported: 0, total: 0, keys: [:])
     }
 }
-
-#endif
